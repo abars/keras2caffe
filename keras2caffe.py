@@ -37,9 +37,9 @@ def convert(keras_model, caffe_net_file, caffe_params_file):
             name = 'data'
             caffe_net[name] = L.Layer()
             input_shape=config['batch_input_shape']
-            input_str = 'input: {}\ninput_dim: {}\ninput_dim: {}\ninput_dim: {}\ninput_dim: {}'.format('"' + name + '"',
-                1, input_shape[3], input_shape[1], input_shape[2])
-            
+            input_str = 'name: {}\ntop: {}\ntype: "Input"\ninput_param{{ shape: {{dim: {} dim: {} dim: {} dim: {} }}}}'.format('"' + name + '"','"' + name + '"',
+        1, input_shape[3], input_shape[1], input_shape[2])
+
         elif layer_type=='Conv2D' or layer_type=='Convolution2D':
             
             strides = config['strides']
@@ -277,7 +277,7 @@ def convert(keras_model, caffe_net_file, caffe_params_file):
         
     
     #replace empty layer with input blob
-    net_proto = input_str + '\n' + 'layer {' + 'layer {'.join(str(caffe_net.to_proto()).split('layer {')[2:])
+    net_proto = 'name:"keras2caffe"\nlayer{\n' + input_str + '\n}' + '\n' + 'layer {' + 'layer {'.join(str(caffe_net.to_proto()).split('layer {')[2:])
     
     f = open(caffe_net_file, 'w') 
     f.write(net_proto)
