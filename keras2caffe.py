@@ -81,6 +81,14 @@ def convert(keras_model, caffe_net_file, caffe_params_file):
             
             blobs[0] = np.array(blobs[0]).transpose(3,2,0,1)
             net_params[name] = blobs
+
+            if config['activation']=='relu':
+                name_s = name+'s'
+                if len(layer.input.consumers())>1:
+                    caffe_net[name_s] = L.ReLU(caffe_net[name])
+                else:
+                    caffe_net[name_s] = L.ReLU(caffe_net[name], in_place=True)
+                name = name_s
         
         elif layer_type=='SeparableConv2D':
             
