@@ -16,7 +16,7 @@ keras2caffe.convert(keras_model, 'SqueezeNet.prototxt', 'SqueezeNet.caffemodel')
 
 #testing the model
 
-caffe.set_mode_gpu()
+#caffe.set_mode_gpu()
 net  = caffe.Net('SqueezeNet.prototxt', 'SqueezeNet.caffemodel', caffe.TEST)
 
 img = cv2.imread('bear.jpg')

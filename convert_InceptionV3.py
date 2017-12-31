@@ -17,14 +17,15 @@ set_session(tf.Session(config=config))
 #converting
 
 keras_model = InceptionV3(input_shape=(299, 299, 3), weights='imagenet', include_top=True)
+keras_model.summary()
 
-keras2caffe.convert(keras_model, 'deploy.prototxt', 'InceptionV3.caffemodel')
+keras2caffe.convert(keras_model, 'InceptionV3.prototxt', 'InceptionV3.caffemodel')
 
 
 #testing the model
 
-caffe.set_mode_gpu()
-net  = caffe.Net('deploy.prototxt', 'InceptionV3.caffemodel', caffe.TEST)
+#caffe.set_mode_gpu()
+net  = caffe.Net('InceptionV3.prototxt', 'InceptionV3.caffemodel', caffe.TEST)
 
 img = cv2.imread('bear.jpg')
 img = cv2.resize(img, (299, 299))
