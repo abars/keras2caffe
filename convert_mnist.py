@@ -44,24 +44,26 @@ x_test = x_test.astype('float32')
 x_train /= 255
 x_test /= 255
 
+#caffe.set_mode_gpu()
+net  = caffe.Net('mnist.prototxt', 'mnist.caffemodel', caffe.TEST)
+
+#verify
 for i in range(5):
 	data = x_train[i]
 	data.shape = (1,) + data.shape
 	pred = keras_model.predict(data)
-	print("Class is: " + str(np.argmax(pred)))
-	print("Certainty is: " + str(pred[0][np.argmax(pred)])+" vs "+str(y_train[i]))
+	print("keras Class is: " + str(np.argmax(pred)))
+	print("Certainty is: " + str(pred[0][np.argmax(pred)]))
+	print("Refernce is: "+str(y_train[i]))
 
-#caffe.set_mode_gpu()
-net  = caffe.Net('mnist.prototxt', 'mnist.caffemodel', caffe.TEST)
+print(" ")
 
 for i in range(5):
 	data = x_train[i]
 	data = data.transpose(2,0,1)
-	net.blobs['data'].data[...] = data
-	out = net.forward()
+	
+	out = net.forward_all(data=data)
 	preds = out['dense_2']
-	print("Class is: " + str(np.argmax(pred)))
-	print("Certainty is: " + str(pred[0][np.argmax(pred)])+" vs "+str(y_train[i]))
 
-
-
+	print("Caffe Class is: " + str(np.argmax(pred)))
+	print("Certainty is: " + str(pred[0][np.argmax(pred)]))
