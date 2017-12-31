@@ -1,10 +1,3 @@
-'''Trains a simple convnet on the MNIST dataset.
-
-Gets to 99.25% test accuracy after 12 epochs
-(there is still a lot of margin for parameter tuning).
-16 seconds per epoch on a GRID K520 GPU.
-'''
-
 from __future__ import print_function
 
 import keras
@@ -14,17 +7,27 @@ from keras.layers import Dense, Dropout, Flatten, InputLayer, Activation
 from keras.layers import Conv2D, MaxPooling2D
 from keras import backend as K
 from keras.models import model_from_json
+from keras.models import load_model
+
+import caffe
+import cv2
+import numpy as np
 
 import keras2caffe
 
-batch_size = 128
-num_classes = 10
-epochs = 1#12
+INLINE_ACTIVATION=False
+if(INLINE_ACTIVATION==False):
+	keras_model = load_model("mnist.hdf5")
+else:
+	keras_model = load_model("mnist_inline.hdf5")
+keras_model.summary()
+
+keras2caffe.convert(keras_model, 'mnist.prototxt', 'mnist.caffemodel')
 
 # input image dimensions
 img_rows, img_cols = 28, 28
 
-# the data, shuffled and split between train and test sets
+#load test data set
 (x_train, y_train), (x_test, y_test) = mnist.load_data()
 
 if K.image_data_format() == 'channels_first':
@@ -40,51 +43,25 @@ x_train = x_train.astype('float32')
 x_test = x_test.astype('float32')
 x_train /= 255
 x_test /= 255
-print('x_train shape:', x_train.shape)
-print(x_train.shape[0], 'train samples')
-print(x_test.shape[0], 'test samples')
 
-# convert class vectors to binary class matrices
-y_train = keras.utils.to_categorical(y_train, num_classes)
-y_test = keras.utils.to_categorical(y_test, num_classes)
+for i in range(5):
+	data = x_train[i]
+	data.shape = (1,) + data.shape
+	pred = keras_model.predict(data)
+	print("Class is: " + str(np.argmax(pred)))
+	print("Certainty is: " + str(pred[0][np.argmax(pred)])+" vs "+str(y_train[i]))
 
-model = Sequential()
+#caffe.set_mode_gpu()
+net  = caffe.Net('mnist.prototxt', 'mnist.caffemodel', caffe.TEST)
 
-model.add(InputLayer(input_shape=input_shape))
-model.add(Conv2D(32, kernel_size=(3, 3),activation='relu'))
-model.add(Conv2D(64, (3, 3)))
-model.add(Activation('relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Dropout(0.25))
-model.add(Flatten())
-model.add(Dense(128))
-model.add(Activation('relu'))
-model.add(Dropout(0.5))
-model.add(Dense(num_classes))
-model.add(Activation('softmax'))
+for i in range(5):
+	data = x_train[i]
+	data = data.transpose(2,0,1)
+	net.blobs['data'].data[...] = data
+	out = net.forward()
+	preds = out['dense_2']
+	print("Class is: " + str(np.argmax(pred)))
+	print("Certainty is: " + str(pred[0][np.argmax(pred)])+" vs "+str(y_train[i]))
 
-model.compile(loss=keras.losses.categorical_crossentropy,
-              optimizer=keras.optimizers.Adadelta(),
-              metrics=['accuracy'])
 
-keras2caffe.convert(model,"my_model.prototxt","my_model.caffemodel")
-
-#model.fit(x_train, y_train,
-#          batch_size=batch_size,
-#          epochs=epochs,
-#          verbose=1,
-#          validation_data=(x_test, y_test))
-#score = model.evaluate(x_test, y_test, verbose=0)
-#print('Test loss:', score[0])
-#print('Test accuracy:', score[1])
-
-#json_string = model.to_json()
-#with open("my_model.json", 'w') as x_file:
-#  x_file.write(json_string)
-#model.save_weights('my_model_weights.h5')
-
-#keras2caffe.convert(model,"my_model.prototxt","my_model.caffemodel")
-
-#model = model_from_json(json_string)
-#model.load_weights('my_model_weights.h5')
 
