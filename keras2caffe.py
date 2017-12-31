@@ -88,7 +88,6 @@ def convert(keras_model, caffe_net_file, caffe_params_file):
                     caffe_net[name_s] = L.ReLU(caffe_net[name])
                 else:
                     caffe_net[name_s] = L.ReLU(caffe_net[name], in_place=True)
-                name = name_s
         
         elif layer_type=='SeparableConv2D':
             
@@ -187,10 +186,12 @@ def convert(keras_model, caffe_net_file, caffe_params_file):
                 net_params[name] = (np.array(blobs[0]).transpose(1, 0), np.array(blobs[1]))
             else:
                 net_params[name] = (blobs[0])
-                
+            
+            name_s = name+'s'
             if config['activation']=='softmax':
-            	caffe_net['softmax'] = L.Softmax(caffe_net[name], in_place=True)
-        
+            	caffe_net[name_s] = L.Softmax(caffe_net[name], in_place=True)
+            elif config['activation']=='relu':
+                caffe_net[name_s] = L.ReLU(caffe_net[name], in_place=True)
         elif layer_type=='Activation':
             if config['activation']=='relu':
             	#caffe_net[name] = L.ReLU(caffe_net[outputs[bottom]], in_place=True)
