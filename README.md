@@ -8,6 +8,9 @@ Working conversion examples:
 - Xception V1
 - SqueezeNet (https://github.com/rcmalli/keras-squeezenet)
 
+Implementing examples:
+- Mnist
+- VGG16
 
 Problem layers:
 - ZeroPadding2D
