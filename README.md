@@ -7,10 +7,10 @@ Working conversion examples:
 - Inception V4 (https://github.com/kentsommer/keras-inceptionV4)
 - Xception V1
 - SqueezeNet (https://github.com/rcmalli/keras-squeezenet)
-
-Implementing examples:
-- Mnist
 - VGG16
+
+Sequential model examples:
+- Mnist
 
 Problem layers:
 - ZeroPadding2D
