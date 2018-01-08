@@ -30,7 +30,7 @@ net  = caffe.Net('VGG16.prototxt', 'VGG16.caffemodel', caffe.TEST)
 
 img = cv2.imread('bear.jpg')
 img = cv2.resize(img, (224, 224))
-img = img[...,::-1]  #RGB 2 BGR
+img = img[...,::-1]  #BGR 2 RGB
 
 data = np.array(img, dtype=np.float32)
 data.shape = (1,) + data.shape
